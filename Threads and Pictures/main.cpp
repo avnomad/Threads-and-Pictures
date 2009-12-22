@@ -14,13 +14,13 @@
 
 #define width 800
 #define height 800
-#define THREADS 10
+#define THREADS 2
 #define MAXITER 100
 #define THRESHOLD 4
-#define MAX_X 0.5
-#define MIN_X -1.9
-#define MAX_Y 1.2
-#define MIN_Y -1.2
+#define MAX_X 0.5f
+#define MIN_X -1.9f
+#define MAX_Y 1.2f
+#define MIN_Y -1.2f
 
 GLfloat picture[height][width][3];
 
@@ -37,7 +37,7 @@ float calculateFactor(float px,float py)
 	for(c = 0 ; c < MAXITER ; ++c)
 	{
 		temp = x*x-y*y+px;
-		y = 2.0*x*y+py;
+		y = 2.0f*x*y+py;
 		x = temp;
 		if (x*x+y*y>THRESHOLD)
 			break;
@@ -53,12 +53,12 @@ DWORD calculateRows(int i)
 	int begin = i*rows + std::min(i,remainder);
 	int end = begin + rows + ((i<remainder)?1:0);
 	float factor;
-	for(int r = begin ; r < end ; ++r)
+	for(int r = end-1 ; r >= begin ; --r)
 	{
 		for(int c = 0 ; c < width ; ++c)
 		{
-			//factor = 0.5*sin(0.1*sqrt((float)(r-height/2)*(r-height/2)+(c-width/2)*(c-width/2))) + 0.5;
-			//factor = 0.5*sin(0.05*r)*cos(0.05*c) + 0.5;
+			//factor = 0.5f*sin(0.1f*sqrt((float)(r-height/2)*(r-height/2)+(c-width/2)*(c-width/2))) + 0.5f;
+			//factor = 0.5f*sin(0.05f*r)*cos(0.05f*c) + 0.5f;
 			factor = calculateFactor(c*((MAX_X-MIN_X)/width)+MIN_X,r*((MAX_Y-MIN_Y)/height)+MIN_Y);
 			picture[r][c][0] = factor;
 			picture[r][c][1] = factor;
@@ -72,16 +72,7 @@ DWORD calculateRows(int i)
 
 void display()
 {
-	glClear(GL_COLOR_BUFFER_BIT);
-
-	glBegin(GL_POINTS);
-		for(int r = 0 ; r < height ; ++r)
-			for(int c = 0 ; c < width ; ++c)
-			{
-				glColor3fv(picture[r][c]);
-				glVertex2i(c,height-1-r);
-			} // end for
-	glEnd();
+	glDrawPixels(width,height,GL_RGB,GL_FLOAT,picture);
 	glutSwapBuffers();
 	glutPostRedisplay();
 } // end function display
@@ -100,9 +91,6 @@ void keyboard(unsigned char key, int x, int y)
 void reshape (int w, int h)
 {
 	glViewport(0, 0, (GLsizei) w, (GLsizei) h);
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluOrtho2D(0.0, (GLdouble) w, 0.0, (GLdouble) h);
 } // end function reshape
 
 
@@ -119,6 +107,8 @@ int main(int argc, char **argv)
 	glewInit();
 
 	// OpenGL initialization
+	glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+	glWindowPos2i(0,0);
 
 	// thread creation
 	HANDLE threadHandle;
