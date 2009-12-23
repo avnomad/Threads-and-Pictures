@@ -24,6 +24,47 @@
 
 GLfloat picture[height][width][3];
 
+
+float spectrumRed(float wavelength)
+{
+	if(wavelength < 435)
+		return (wavelength-435)/(380-435);
+	else if(wavelength < 510)
+		return 0;
+	else if(wavelength < 580)
+		return (wavelength-510)/(580-510);
+	else
+		return 1;
+} // end function spectrumRed
+
+
+float spectrumGreen(float wavelength)
+{
+	if(wavelength < 435)
+		return 0;
+	else if(wavelength < 485)
+		return (wavelength-435)/(485-435);
+	else if(wavelength < 580)
+		return 1;
+	else if(wavelength < 640)
+		return (wavelength-640)/(580-640);
+	else
+		return 0;
+} // end function spectrumGreen
+
+
+float spectrumBlue(float wavelength)
+{
+	if(wavelength < 485)
+		return 1;
+	else if(wavelength < 510)
+		return (wavelength-510)/(485-510);
+	else
+		return 0;
+} // end function spectrumBlue
+
+
+
 // δεν έχει ελεγθει (αυστηρά) για ορθότητα... (δεν προλάβαινα)
 // π.χ. μπορεί να γράψουν δυο διαφορετικά νήματα την ίδια σειρά
 // ή μια σειρά να μην γραφεί από κανένα;
@@ -60,9 +101,10 @@ DWORD calculateRows(int i)
 			//factor = 0.5f*sin(0.1f*sqrt((float)(r-height/2)*(r-height/2)+(c-width/2)*(c-width/2))) + 0.5f;
 			//factor = 0.5f*sin(0.05f*r)*cos(0.05f*c) + 0.5f;
 			factor = calculateFactor(c*((MAX_X-MIN_X)/width)+MIN_X,r*((MAX_Y-MIN_Y)/height)+MIN_Y);
-			picture[r][c][0] = factor;
-			picture[r][c][1] = factor;
-			picture[r][c][2] = 0.5;
+			float wavelength = (640-400)*(1-factor) + 400;
+			picture[r][c][0] = spectrumRed(wavelength);
+			picture[r][c][1] = spectrumGreen(wavelength);
+			picture[r][c][2] = spectrumBlue(wavelength);
 		} // end inner for
 		Sleep(5);
 	} // end for
