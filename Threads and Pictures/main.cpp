@@ -12,11 +12,13 @@
 #include <algorithm>
 #include <windows.h>
 
+#include "color table.h"
+
 #define width 800
 #define height 800
 #define THREADS 2
-#define MAXITER 100
-#define THRESHOLD 4
+#define MAXITER 255
+#define THRESHOLD 25
 #define MAX_X 0.5f
 #define MIN_X -1.9f
 #define MAX_Y 1.2f
@@ -101,10 +103,14 @@ DWORD calculateRows(int i)
 			//factor = 0.5f*sin(0.1f*sqrt((float)(r-height/2)*(r-height/2)+(c-width/2)*(c-width/2))) + 0.5f;
 			//factor = 0.5f*sin(0.05f*r)*cos(0.05f*c) + 0.5f;
 			factor = calculateFactor(c*((MAX_X-MIN_X)/width)+MIN_X,r*((MAX_Y-MIN_Y)/height)+MIN_Y);
-			float wavelength = (640-400)*(1-factor) + 400;
+			/*float wavelength = (640-400)*(1-factor) + 400;
 			picture[r][c][0] = spectrumRed(wavelength);
 			picture[r][c][1] = spectrumGreen(wavelength);
-			picture[r][c][2] = spectrumBlue(wavelength);
+			picture[r][c][2] = spectrumBlue(wavelength);*/
+
+			picture[r][c][0] = mandel256[(int)(255*factor)].red;
+			picture[r][c][1] = mandel256[(int)(255*factor)].green;
+			picture[r][c][2] = mandel256[(int)(255*factor)].blue;
 		} // end inner for
 		Sleep(5);
 	} // end for
