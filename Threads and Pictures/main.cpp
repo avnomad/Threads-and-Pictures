@@ -12,17 +12,41 @@
 #include <algorithm>
 #include <windows.h>
 
+#include <iostream>
+using std::cout;
+using std::cin;
+using std::endl;
+using std::cerr;
+using std::clog;
+using std::left;
+
+#include <iomanip>
+using std::setw;
+using std::setprecision;
+
+#include <fstream>
+using std::ifstream;
+using std::ofstream;
+using std::fstream;
+using std::ios;
+
+
 #include "color table.h"
 
-#define width 800
+#define width 1000
 #define height 800
-#define THREADS 2
+#define THREADS 4
 #define MAXITER 255
 #define THRESHOLD 25
-#define MAX_X 0.5f
-#define MIN_X -1.9f
+#define MAX_X 0.8f
+#define MIN_X -2.2f
 #define MAX_Y 1.2f
 #define MIN_Y -1.2f
+
+#define FWidth 29912
+#define FHeight 23930
+//#define FWidth 12500
+//#define FHeight 10000
 
 GLfloat picture[height][width][3];
 
@@ -89,6 +113,24 @@ float calculateFactor(float px,float py)
 } // end function calculateFactor
 
 
+int calculateFactorI(float px,float py)
+{
+	int c;
+	float x = -0.0;
+	float y = 0.0;
+	float temp;
+	for(c = 0 ; c < MAXITER ; ++c)
+	{
+		temp = x*x-y*y+px;
+		y = 2.0f*x*y+py;
+		x = temp;
+		if (x*x+y*y>THRESHOLD)
+			break;
+	}
+	return c;
+} // end function calculateFactor
+
+
 DWORD calculateRows(int i)
 {
 	int rows = height / THREADS;
@@ -103,16 +145,20 @@ DWORD calculateRows(int i)
 			//factor = 0.5f*sin(0.1f*sqrt((float)(r-height/2)*(r-height/2)+(c-width/2)*(c-width/2))) + 0.5f;
 			//factor = 0.5f*sin(0.05f*r)*cos(0.05f*c) + 0.5f;
 			factor = calculateFactor(c*((MAX_X-MIN_X)/width)+MIN_X,r*((MAX_Y-MIN_Y)/height)+MIN_Y);
-			/*float wavelength = (640-400)*(1-factor) + 400;
+			float wavelength = (640-380)*(factor) + 380;
 			picture[r][c][0] = spectrumRed(wavelength);
 			picture[r][c][1] = spectrumGreen(wavelength);
-			picture[r][c][2] = spectrumBlue(wavelength);*/
+			picture[r][c][2] = spectrumBlue(wavelength);
 
-			picture[r][c][0] = mandel256[(int)(255*factor)].red;
+			/*picture[r][c][0] = factor;
+			picture[r][c][1] = factor;
+			picture[r][c][2] = 0.5;*/
+
+			/*picture[r][c][0] = mandel256[(int)(255*factor)].red;
 			picture[r][c][1] = mandel256[(int)(255*factor)].green;
-			picture[r][c][2] = mandel256[(int)(255*factor)].blue;
+			picture[r][c][2] = mandel256[(int)(255*factor)].blue;*/
 		} // end inner for
-		Sleep(5);
+		//Sleep(5);
 	} // end for
 	return i;
 } // end function calculateRow
@@ -122,7 +168,7 @@ void display()
 {
 	glDrawPixels(width,height,GL_RGB,GL_FLOAT,picture);
 	glutSwapBuffers();
-	glutPostRedisplay();
+	//glutPostRedisplay();
 } // end function display
 
 
@@ -130,6 +176,45 @@ void keyboard(unsigned char key, int x, int y)
 {
 	switch(key)
 	{
+	case '\r':	// enter key
+	{
+		ofstream out("c:/mandel.ppm",std::ios_base::out|std::ios_base::binary);
+		out << "P6\n" << FWidth << ' ' << FHeight << "\n255 ";
+		//for(int r = height-1 ; r >= 0 ; --r)
+		//	for(int c = 0 ; c < width ; ++c)
+		//	{
+		//		out.put(255*picture[r][c][0]);
+		//		out.put(255*picture[r][c][1]);
+		//		out.put(255*picture[r][c][2]);
+		//	} // end for
+		int esquapeTime;
+		float factor;
+		cout << std::fixed << setprecision(0) << 0.0 << '%' << endl;
+		for(int r = 0 ; r < FHeight ; ++r)
+		{
+			for(int c = 0 ; c < FWidth ; ++c)
+			{
+				factor = calculateFactor(c*((MAX_X-MIN_X)/FWidth)+MIN_X,r*((MAX_Y-MIN_Y)/FHeight)+MIN_Y);
+				float wavelength = (640-380)*(factor) + 380;
+				out.put(255*spectrumRed(wavelength));
+				out.put(255*spectrumGreen(wavelength));
+				out.put(255*spectrumBlue(wavelength));
+
+				/*esquapeTime = calculateFactor(c*((MAX_X-MIN_X)/FWidth)+MIN_X,r*((MAX_Y-MIN_Y)/FHeight)+MIN_Y);
+				out.put(255*mandel256[esquapeTime].red);
+				out.put(255*mandel256[esquapeTime].green);
+				out.put(255*mandel256[esquapeTime].blue);*/
+			} // end for
+			if(r % (FHeight/100) == 0)
+			{
+				system("CLS");
+				cout << (float)(r+1) / FHeight * 100 << '%' << endl;
+			} // end if
+		} // end for
+		out.close();
+		cout << '\a';
+		break;
+	}
 	case 27:	// escape key
 		exit(0);
 	} // end switch
@@ -148,7 +233,7 @@ int main(int argc, char **argv)
 	glutInit(&argc,argv);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
 	glutInitWindowSize(width,height);
-	glutInitWindowPosition(1270-width,160);
+	glutInitWindowPosition(1270-width,100);
 	glutCreateWindow("Mandelbrot Set");
 
 	// glew initialization
