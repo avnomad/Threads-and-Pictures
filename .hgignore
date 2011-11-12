@@ -1,0 +1,8 @@
+syntax: regexp
+Debug/*
+ipch/*
+Release/*
+syntax: glob
+Threads and Pictures.opensdf
+Threads and Pictures.sdf
+Threads and Pictures.suo
