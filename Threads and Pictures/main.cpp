@@ -35,7 +35,7 @@ using std::ios;
 
 #define width 1000
 #define height 800
-#define THREADS 4
+#define THREADS 6
 #define MAXITER 255
 #define THRESHOLD 25
 #define MAX_X 0.8f
@@ -158,7 +158,7 @@ DWORD calculateRows(int i)
 			picture[r][c][1] = mandel256[(int)(255*factor)].green;
 			picture[r][c][2] = mandel256[(int)(255*factor)].blue;*/
 		} // end inner for
-		//Sleep(5);
+		Sleep(5);
 	} // end for
 	return i;
 } // end function calculateRow
@@ -168,7 +168,7 @@ void display()
 {
 	glDrawPixels(width,height,GL_RGB,GL_FLOAT,picture);
 	glutSwapBuffers();
-	//glutPostRedisplay();
+	glutPostRedisplay();
 } // end function display
 
 
