@@ -189,41 +189,50 @@ void keyboard(unsigned char key, int x, int y)
 	{
 	case '\r':	// enter key
 	{
-		ofstream out("c:/mandel.ppm",std::ios_base::out|std::ios_base::binary);
-		out << "P6\n" << FWidth << ' ' << FHeight << "\n255 ";
-		//for(int r = height-1 ; r >= 0 ; --r)
-		//	for(int c = 0 ; c < width ; ++c)
-		//	{
-		//		out.put(255*picture[r][c][0]);
-		//		out.put(255*picture[r][c][1]);
-		//		out.put(255*picture[r][c][2]);
-		//	} // end for
-		int esquapeTime;
-		float factor;
-		cout << std::fixed << setprecision(0) << 0.0 << '%' << endl;
-		for(int r = 0 ; r < FHeight ; ++r)
+		ofstream out("mandel.ppm",std::ios_base::out|std::ios_base::binary);
+		if(out)
 		{
-			for(int c = 0 ; c < FWidth ; ++c)
+			out << "P6\n" << FWidth << ' ' << FHeight << "\n255 ";
+			//for(int r = height-1 ; r >= 0 ; --r)
+			//	for(int c = 0 ; c < width ; ++c)
+			//	{
+			//		out.put(255*picture[r][c][0]);
+			//		out.put(255*picture[r][c][1]);
+			//		out.put(255*picture[r][c][2]);
+			//	} // end for
+			int esquapeTime;
+			float factor;
+			cout << std::fixed << setprecision(0);
+			for(int r = 0 ; r < FHeight ; ++r)
 			{
-				factor = calculateFactor(c*((MAX_X-MIN_X)/FWidth)+MIN_X,r*((MAX_Y-MIN_Y)/FHeight)+MIN_Y);
-				float wavelength = (640-380)*(factor) + 380;
-				out.put(255*spectrumRed(wavelength));
-				out.put(255*spectrumGreen(wavelength));
-				out.put(255*spectrumBlue(wavelength));
+				if(r % (FHeight/100) == 0)
+				{
+					system("CLS");
+					cout << (float)r / FHeight * 100 << '%' << endl;
+				} // end if
+				for(int c = 0 ; c < FWidth ; ++c)
+				{
+					factor = calculateFactor(c*((MAX_X-MIN_X)/FWidth)+MIN_X,r*((MAX_Y-MIN_Y)/FHeight)+MIN_Y);
+					float wavelength = (640-380)*(factor) + 380;
+					out.put(255*spectrumRed(wavelength));
+					out.put(255*spectrumGreen(wavelength));
+					out.put(255*spectrumBlue(wavelength));
 
-				/*esquapeTime = calculateFactor(c*((MAX_X-MIN_X)/FWidth)+MIN_X,r*((MAX_Y-MIN_Y)/FHeight)+MIN_Y);
-				out.put(255*mandel256[esquapeTime].red);
-				out.put(255*mandel256[esquapeTime].green);
-				out.put(255*mandel256[esquapeTime].blue);*/
+					/*esquapeTime = calculateFactor(c*((MAX_X-MIN_X)/FWidth)+MIN_X,r*((MAX_Y-MIN_Y)/FHeight)+MIN_Y);
+					out.put(255*mandel256[esquapeTime].red);
+					out.put(255*mandel256[esquapeTime].green);
+					out.put(255*mandel256[esquapeTime].blue);*/
+				} // end for
 			} // end for
-			if(r % (FHeight/100) == 0)
-			{
-				system("CLS");
-				cout << (float)(r+1) / FHeight * 100 << '%' << endl;
-			} // end if
-		} // end for
-		out.close();
-		cout << '\a';
+			system("CLS");
+			cout << 100.0 << '%' << endl;
+			out.close();
+			cout << '\a';
+		}
+		else
+		{
+			cerr << "Could not open file for output!" << endl;
+		} // end else
 		break;
 	}
 	case 27:	// escape key
